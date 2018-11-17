@@ -10,6 +10,7 @@ app.start = function() {
   app.use(loopback.token({
     model: app.models.accessToken
   }))
+  app.models.user.settings.acls = require('../common/models/user.json').acls
 
   // start the web server
   return app.listen(function() {

@@ -11,6 +11,7 @@ const {
   toEth,
   fromEth,
   buildCreate2Address,
+  getBalance,
 } = require('../../lib/helpers')
 const {
   buildCFContractAddress
@@ -27,6 +28,41 @@ function getUser(User, where) {
   })
 }
 
+const watchers = {}
+
+async function spawnWatcher(user) {
+  if (watchers[user.userId]) return
+  watchers[user.userId] = true
+  let oldBal
+  const updateBal = async () => {
+    try {
+      const bal = await getBalance(user.contractAddress)
+      if (bal > 0 && user.contractStatus === 'reserved') {
+        user.updateAttribute('contractStatus', 'ready', (err) => {
+          if (err) {
+            console.log(err)
+          }
+        })
+      }
+      if (bal != oldBal) {
+        user.updateAttribute('balance', bal, (err) => {
+          if (err) {
+            console.log(err)
+          }
+        })
+      }
+
+      oldBal = bal
+    } catch(err) {
+
+    }
+  }
+  await updateBal()
+  setInterval(async () => {
+    updateBal()
+  }, 3e3)
+}
+
 module.exports = function(User) {
   User.settings.caseSensitiveEmail = false
 
@@ -41,7 +77,7 @@ module.exports = function(User) {
       const salt = Date.now()
 
       ctx.instance.contractAddress = await buildCFContractAddress(salt)
-      ctx.instance.status = 'inactive'
+      ctx.instance.contractStatus = 'reserved'
 
       next()
     })();
@@ -91,10 +127,27 @@ module.exports = function(User) {
     returns: {type: 'boolean', arg: 'passwordChanged'}
   })
 
+  User.afterRemote('login', function (ctx, user, next) {
+    ;(async () => {
+      User.findById(ctx.result.userId, async (err, user) => {
+        spawnWatcher(user)
+        next()
+      })
+    })();
+  })
+
   User.on('resetPasswordRequest', function (info) {
     ;(async () => {
       const { email, accessToken } = info
       const {id:token} = accessToken
+
+      /*
+      let t = User.app.models.accessToken.create({
+        ttl: -1,
+        scopes: ['test']
+      })
+      console.log(t)
+      */
 
       console.log(token)
 
@@ -102,6 +155,8 @@ module.exports = function(User) {
 
       await sendMail({
         to: email,
+        from: 'no-reply@example.com',
+        subject: 'Reset password',
         text,
         html: text
       })

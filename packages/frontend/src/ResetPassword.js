@@ -1,8 +1,7 @@
 import React, { Component } from 'react';
 import styled from 'styled-components'
-import {
-  getModels,
-} from './utils';
+import { connect } from 'react-redux'
+import { resetPassword } from './actions'
 
 const UI = {
   Header: styled.div`
@@ -63,78 +62,34 @@ class App extends Component {
   constructor() {
     super()
     this.state = {
-      error: null,
-      output: null,
       password: '',
       passwordConfirm: '',
+      token: ''
     }
+  }
+
+  componentDidMount() {
+    const params = new URLSearchParams(window.location.search)
+    const token = params.get('access_token')
+    this.setState({
+      token
+    })
   }
 
   async resetPassword() {
-    this.clearOutput()
+    const { password, passwordConfirm, token } = this.state
 
-    try {
-      const { password, passwordConfirm } = this.state
-
-      if (password !== passwordConfirm) {
-        throw Error('passwords do not match')
-      }
-
-      const params = new URLSearchParams(window.location.search)
-      const token = params.get('access_token')
-      const accessToken = getModels().accessToken(token)
-
-      await getModels().user.updatePasswordFromToken(
-        accessToken,
-        token,
-        password,
-      )
-
-      this.setState({
-        output: {
-
-        },
-        password: '',
-        passwordConfirm: '',
-      })
-    } catch(err) {
-      this.handleError(err)
-    }
-  }
-
-  clearOutput() {
-    this.setState({
-      error: null,
-      output: null,
-    })
-  }
-
-  handleError(err) {
-    console.error(err.message)
-    this.setState({
-      error: err.message
-    })
+    await this.props.resetPassword(password, passwordConfirm, token)
   }
 
   render() {
-    let output = null
-    if (this.state.output) {
-      output = JSON.stringify(this.state.output, null, 2)
-    }
-
-    const { password, passwordConfirm, error } = this.state
+    const { password, passwordConfirm } = this.state
 
     return (
       <UI.Container>
-        {error && <UI.Error>
-          {error}
-        </UI.Error>}
-        {output && <UI.Output>
-          {output}
-        </UI.Output>}
         <UI.Header>
           Reset password
-      </UI.Header>
+        </UI.Header>
         <UI.Form onSubmit={event => {
           event.preventDefault()
           this.resetPassword()
@@ -158,4 +113,19 @@ class App extends Component {
   }
 }
 
-export default App;
+const mapStateToProps = (state, ownProps) => {
+  return {
+
+  }
+}
+
+const mapDispatchToProps = (dispatch, ownProps) => {
+  return {
+    resetPassword: (password, passwordConfirm, token) => dispatch(resetPassword(password, passwordConfirm, token)),
+  }
+}
+
+export default connect(
+  mapStateToProps,
+  mapDispatchToProps,
+)(App)

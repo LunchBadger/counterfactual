@@ -63,7 +63,7 @@ async function getHubAccount() {
 
 async function getBalance(account) {
   return new Promise((resolve, reject) => {
-    getWindowWeb3().eth.getBalance(account, (err, result) => {
+    web3.eth.getBalance(account, (err, result) => {
       if (err) return reject(err)
       resolve(result)
     })

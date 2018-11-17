@@ -1,8 +1,7 @@
 import React, { Component } from 'react';
 import styled from 'styled-components'
-import {
-  getModels,
-} from './utils';
+import { connect } from 'react-redux'
+import { login } from './actions'
 
 const UI = {
   Header: styled.div`
@@ -63,64 +62,24 @@ class App extends Component {
   constructor() {
     super()
     this.state = {
-      error: null,
-      output: null,
       email: 'alice@example.com',
       password: 'helloworld123'
     }
   }
 
   async login() {
-    this.clearOutput()
-
-    try {
-      const { email, password } = this.state
-      const result = await getModels().user.login({
-        email, password})
-        //const token = result.id
-
-      this.setState({
-        output: {
-          userId: result.userId
-        },
-        email: '',
-        password: '',
-      })
-    } catch(err) {
-      this.handleError(err)
+    const { email, password } = this.state
+    await this.props.login(email, password)
+    if (this.props.loggedIn) {
+      this.props.history.push('/status')
     }
-  }
-
-  clearOutput() {
-    this.setState({
-      error: null,
-      output: null,
-    })
-  }
-
-  handleError(err) {
-    console.error(err.message)
-    this.setState({
-      error: err.message
-    })
   }
 
   render() {
-    let output = null
-    if (this.state.output) {
-      output = JSON.stringify(this.state.output, null, 2)
-    }
-
-    const { email, password, error } = this.state
+    const { email, password } = this.state
 
     return (
       <UI.Container>
-        {error && <UI.Error>
-          {error}
-        </UI.Error>}
-        {output && <UI.Output>
-          {output}
-        </UI.Output>}
         <UI.Header>
           Login
         </UI.Header>
@@ -141,10 +100,28 @@ class App extends Component {
               Log in
             </UI.Button>
           </UI.Actions>
+          <UI.Actions>
+            <a href="/forgot-password">Forgot password</a>
+          </UI.Actions>
         </UI.Form>
       </UI.Container>
     );
   }
 }
 
-export default App;
+const mapStateToProps = (state, ownProps) => {
+  return {
+    loggedIn: state.loggedIn
+  }
+}
+
+const mapDispatchToProps = (dispatch, ownProps) => {
+  return {
+    login: (email, password) => dispatch(login(email, password)),
+  }
+}
+
+export default connect(
+  mapStateToProps,
+  mapDispatchToProps,
+)(App)

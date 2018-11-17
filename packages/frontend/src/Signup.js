@@ -1,8 +1,7 @@
 import React, { Component } from 'react';
 import styled from 'styled-components'
-import {
-  getModels,
-} from './utils';
+import { connect } from 'react-redux'
+import { signup } from './actions'
 
 const UI = {
   Header: styled.div`
@@ -63,68 +62,25 @@ class App extends Component {
   constructor() {
     super()
     this.state = {
-      error: null,
-      output: null,
       email: 'alice@example.com',
       password: 'helloworld123'
     }
   }
 
   async signup() {
-    this.clearOutput()
-
-    try {
-      const { email, password } = this.state
-      const result = await getModels().User.create({
-        email,
-        password,
-      })
-
-      this.setState({
-        output: {
-          id: result.id,
-          email: result.email,
-          contractAddress: result.contractAddress,
-          status: result.status,
-        },
-        email: '',
-        password: '',
-      })
-    } catch(err) {
-      this.handleError(err)
+    const { email, password } = this.state
+    await this.props.signup(email, password)
+    if (this.props.loggedIn) {
+      this.props.history.push('/status')
     }
-  }
 
-  clearOutput() {
-    this.setState({
-      error: null,
-      output: null,
-    })
-  }
-
-  handleError(err) {
-    console.error(err.message)
-    this.setState({
-      error: err.message
-    })
   }
 
   render() {
-    let output = null
-    if (this.state.output) {
-      output = JSON.stringify(this.state.output, null, 2)
-    }
-
-    const { email, password, error } = this.state
+    const { email, password } = this.state
 
     return (
       <UI.Container>
-        {error && <UI.Error>
-          {error}
-        </UI.Error>}
-        {output && <UI.Output>
-          {output}
-        </UI.Output>}
         <UI.Header>
           Sign up
         </UI.Header>
@@ -151,4 +107,19 @@ class App extends Component {
   }
 }
 
-export default App;
+const mapStateToProps = (state, ownProps) => {
+  return {
+    loggedIn: state.loggedIn
+  }
+}
+
+const mapDispatchToProps = (dispatch, ownProps) => {
+  return {
+    signup: (email, password) => dispatch(signup(email, password)),
+  }
+}
+
+export default connect(
+  mapStateToProps,
+  mapDispatchToProps,
+)(App)

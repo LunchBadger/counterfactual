@@ -1,8 +1,7 @@
 import React, { Component } from 'react';
 import styled from 'styled-components'
-import {
-  getModels,
-} from './utils';
+import { connect } from 'react-redux'
+import { sendResetPasswordEmail } from './actions'
 
 const UI = {
   Header: styled.div`
@@ -63,65 +62,26 @@ class App extends Component {
   constructor() {
     super()
     this.state = {
-      error: null,
-      output: null,
       email: 'alice@example.com',
     }
   }
 
   async forgotPassword() {
-    this.clearOutput()
-
-    try {
-      const { email } = this.state
-      await getModels().User.resetPassword({
-        email,
-      })
-
-      this.setState({
-        output: {
-          sent: true
-        },
-        email: '',
-      })
-    } catch(err) {
-      this.handleError(err)
-    }
-  }
-
-  clearOutput() {
+    const { email } = this.state
+    await this.props.sendResetPasswordEmail(email)
     this.setState({
-      error: null,
-      output: null,
-    })
-  }
-
-  handleError(err) {
-    console.error(err.message)
-    this.setState({
-      error: err.message
+      email: ''
     })
   }
 
   render() {
-    let output = null
-    if (this.state.output) {
-      output = JSON.stringify(this.state.output, null, 2)
-    }
-
-    const { email, error } = this.state
+    const { email } = this.state
 
     return (
       <UI.Container>
-        {error && <UI.Error>
-          {error}
-        </UI.Error>}
-        {output && <UI.Output>
-          {output}
-        </UI.Output>}
         <UI.Header>
           Forgot password
-      </UI.Header>
+        </UI.Header>
         <UI.Form onSubmit={event => {
           event.preventDefault()
           this.forgotPassword()
@@ -135,10 +95,26 @@ class App extends Component {
               Send reset email
             </UI.Button>
           </UI.Actions>
+          <UI.Actions>
+            <a href="/login">Login</a>
+          </UI.Actions>
         </UI.Form>
       </UI.Container>
     );
   }
 }
 
-export default App;
+const mapStateToProps = (state, ownProps) => {
+  return { }
+}
+
+const mapDispatchToProps = (dispatch, ownProps) => {
+  return {
+    sendResetPasswordEmail: (email) => dispatch(sendResetPasswordEmail(email)),
+  }
+}
+
+export default connect(
+  mapStateToProps,
+  mapDispatchToProps,
+)(App)

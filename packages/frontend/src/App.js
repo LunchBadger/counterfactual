@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import { BrowserRouter as Router, Route, Link } from "react-router-dom";
+import { connect } from 'react-redux'
 import styled from 'styled-components'
 import Home from './Home'
 import Channel from './Channel'
@@ -9,6 +10,12 @@ import Login from './Login'
 import Signup from './Signup'
 import ForgotPassword from './ForgotPassword'
 import ResetPassword from './ResetPassword'
+import Logout from './Logout'
+import { refreshUser } from './actions'
+
+import {
+  toEth
+} from './utils'
 
 const UI = {
   Container: styled.div`
@@ -30,7 +37,7 @@ const UI = {
     display: flex;
     vertical-align: middle;
     justify-content: center;
-    a {
+    > a {
       margin-left: 1em;
       color: #3489b5;
       text-decoration: none;
@@ -50,10 +57,39 @@ const UI = {
     margin-right: 1em;
     font-size: 1.2em;
   `,
+  ErrorMessage: styled.div`
+    text-align: center;
+    padding: 1em;
+    color: red;
+  `,
+  SuccessMessage: styled.div`
+    text-align: center;
+    padding: 1em;
+    color: green;
+  `,
 }
 
 class App extends Component {
+  componentDidMount() {
+    setInterval(() => {
+      if (this.props.loggedIn) {
+        this.props.refreshUser(this.props.userId)
+      }
+    }, 3e3)
+  }
+
   render() {
+    const {
+      errorMessage,
+      successMessage,
+      loggedIn,
+      contractAddress,
+      contractStatus,
+      balance,
+      email,
+      userId,
+    } = this.props
+
     return (
       <Router>
         <UI.Container>
@@ -61,17 +97,49 @@ class App extends Component {
             <UI.HeaderInner>
               <UI.Title>Demo</UI.Title>
               <UI.Nav>
-                <Link to="/">Home</Link>
-                <Link to="/channel">Deposit to hub</Link>
-                <Link to="/closechannel">Close channel</Link>
-                <Link to="/status">Channel Status</Link>
-                <Link to="/login">Login</Link>
-                <Link to="/signup">Signup</Link>
-                <Link to="/forgot-password">Forgot Password</Link>
-                <Link to="/reset-password">Reset Password</Link>
+                {loggedIn ?
+                  [
+                  <div>
+                    <div>
+                      email: {email}
+                    </div>
+                    <div>
+                      user ID: {userId}
+                    </div>
+                    <div>
+                      Address: {contractAddress}
+                    </div>
+                    <div>
+                      Status: {contractStatus}
+                    </div>
+                    <div>
+                      Balance: {toEth(balance)}
+                    </div>
+                    <div>
+                      <Link to="/logout">Logout</Link>
+                    </div>
+                  </div>,
+                  ]
+                  :
+                [
+                <Link to="/login">Login</Link>,
+                <Link to="/signup">Signup</Link>,
+                <Link to="/forgot-password">Forgot Password</Link>,
+                ]
+                }
               </UI.Nav>
             </UI.HeaderInner>
           </UI.Header>
+          {errorMessage ?
+            <UI.ErrorMessage>
+              {errorMessage}
+            </UI.ErrorMessage>
+          : null}
+          {successMessage ?
+            <UI.SuccessMessage>
+              {successMessage}
+            </UI.SuccessMessage>
+          : null}
           <Route path="/" exact component={Home} />
           <Route path="/channel" exact component={Channel} />
           <Route path="/closechannel" exact component={CloseChannel} />
@@ -80,10 +148,33 @@ class App extends Component {
           <Route path="/signup" exact component={Signup} />
           <Route path="/forgot-password" exact component={ForgotPassword} />
           <Route path="/reset-password" exact component={ResetPassword} />
+          <Route path="/logout" exact component={Logout} />
         </UI.Container>
       </Router>
     );
   }
 }
 
-export default App;
+const mapStateToProps = (state, ownProps) => {
+  return {
+    loggedIn: state.loggedIn,
+    email: state.email,
+    userId: state.userId,
+    contractAddress: state.contractAddress,
+    contractStatus: state.contractStatus,
+    balance: state.balance,
+    errorMessage: state.errorMessage,
+    successMessage: state.successMessage
+  }
+}
+
+const mapDispatchToProps = (dispatch, ownProps) => {
+  return {
+    refreshUser: (userId) => dispatch(refreshUser(userId))
+  }
+}
+
+export default connect(
+  mapStateToProps,
+  mapDispatchToProps,
+)(App);
