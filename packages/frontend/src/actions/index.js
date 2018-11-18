@@ -154,10 +154,12 @@ export const sendEther = (recipient, amount) => {
   }
 }
 
-export const deployContract = () => {
+export const deployContract = (userId) => {
   return async dispatch => {
     try {
-      dispatch(setSuccessMessage('deploying'))
+      const {txHash} = await getModels().User.deployContract({userId})
+
+      dispatch(setSuccessMessage(`transaction ${txHash}`))
     } catch(err) {
       dispatch(setErrorMessage(err.message))
     }

@@ -73,12 +73,14 @@ const UI = {
 
 class App extends Component {
   componentDidMount() {
-    this.props.refreshUser(this.props.userId)
-    setInterval(() => {
-      if (this.props.loggedIn) {
-        this.props.refreshUser(this.props.userId)
-      }
-    }, 3e3)
+    if (this.props.userId) {
+      this.props.refreshUser(this.props.userId)
+      setInterval(() => {
+        if (this.props.loggedIn) {
+          this.props.refreshUser(this.props.userId)
+        }
+      }, 3e3)
+    }
   }
 
   render() {

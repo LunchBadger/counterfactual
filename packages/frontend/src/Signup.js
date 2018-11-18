@@ -71,7 +71,7 @@ class App extends Component {
     const { email, password } = this.state
     await this.props.signup(email, password)
     if (this.props.loggedIn) {
-      this.props.history.push('/status')
+      this.props.history.push('/deploy')
     }
 
   }

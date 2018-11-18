@@ -20,11 +20,9 @@ module.exports = {
       host: 'localhost',
       port: 8545,
       network_id: '*', // Match any network id
-      // from: '0xb2b0f76ece233b8e4bb318e9d663bead67060ca8',
-      from: '0x3f5206e8bc99b6fd2913cd2b1667dd7a7cdd5d69',
+      from: '0xb2b0f76ece233b8e4bb318e9d663bead67060ca8',
       provider: new HDWalletProvider(
-        //'purse alien once arrive fitness deposit visa token sun brick intact slam',
-          'eight spell unique say nurse angle property stadium task donkey blast honey',
+        'purse alien once arrive fitness deposit visa token sun brick intact slam',
           'http://localhost:8545',
       )
     },

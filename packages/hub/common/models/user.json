@@ -98,6 +98,9 @@
     },
     "balance": {
       "type": "string"
+    },
+    "salt": {
+      "type": "number"
     }
   },
   "validations": [],

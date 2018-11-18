@@ -8,6 +8,9 @@ install:
 lerna:
 	@lerna bootstrap
 
+.PHONY: link
+link: lerna
+
 .PHONY: build
 build:
 	@npm run build
@@ -38,15 +41,15 @@ start/testrpc:
 
 .PHONY: start/parity
 start/parity:
-	@./parity -c dev-insecure --chain ./packages/channel-contracts/chain.json --jsonrpc-cors=all
+	@./parity -c dev-insecure --chain ./packages/channel-contracts/chain.json --jsonrpc-cors=all --ws-interface all --ws-origins all --ws-hosts all
 
 .PHONY: deploy/contracts
 deploy/contracts:
-	@(cd packages/channel-contracts && rm -rf build && truffle deploy)
+	@(cd packages/channel-contracts && rm -rf build && truffle deploy --network=development --reset)
 
 .PHONY: test/contracts
 test/contracts:
-	@(cd packages/channel-contracts && truffle test)
+	@(cd packages/channel-contracts && truffle test --reset)
 
 .PHONY: test/hub/user
 test/hub/user:

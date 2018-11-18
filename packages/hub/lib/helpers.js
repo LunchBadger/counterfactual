@@ -82,25 +82,40 @@ function fromEth(value) {
   return new BN(web3.utils.toWei(`${value||0}`, 'ether').toString(10), 10)
 }
 
+function numberToUint256(value) {
+  let result = null;
+
+  try {
+    const hex = value.toString(16);
+    result = `${'0'.repeat(64 - hex.length)}${hex}`;
+  } catch (err) {
+    result = null
+  }
+
+  return result
+    ? `0x${result}`
+    : '0x';
+}
+
 function buildCreate2Address(creatorAddress, saltHex, byteCode) {
   const parts = [
     'ff',
-    creatorAddress.slice(2),
-    saltHex.slice(2),
-    web3.utils.sha3(byteCode).slice(2),
-  ]
+    creatorAddress,
+    saltHex,
+    web3.utils.sha3(byteCode),
+  ].map((part) => part.startsWith('0x')
+    ? part.slice(2)
+    : part
+  );
 
-  const partsHash = web3.utils.sha3(`0x${parts.join('')}`)
-  return `0x${partsHash.slice(-40)}`.toLowerCase()
+  const partsHash = web3.utils.sha3(`0x${parts.join('')}`);
+
+  return `0x${partsHash.slice(-40)}`.toLowerCase();
 }
 
-function numberToUint256(value) {
-  try {
-    const hex = value.toString(16)
-    return `0x${'0'.repeat(64 - hex.length)}${hex}`
-  } catch (err) {}
-
-  return null
+async function isContract(address) {
+  const code = await web3.eth.getCode(address)
+  return code.slice(2).length > 0
 }
 
 module.exports = {
@@ -118,5 +133,6 @@ module.exports = {
   toBig,
   buildCreate2Address,
   numberToUint256,
-  getHubAccount
+  getHubAccount,
+  isContract,
 }

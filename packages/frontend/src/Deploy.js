@@ -77,7 +77,7 @@ class App extends Component {
   }
 
   async deploy() {
-    await this.props.deployContract()
+    await this.props.deployContract(this.props.userId)
   }
 
   render() {
@@ -85,7 +85,7 @@ class App extends Component {
     const bal = new BN(this.props.balance)
     const amt = new BN(toWei(amount))
     const zero = new BN(0)
-    const disabled = !(bal.gte(amt) && amt.gt(zero))
+    const disabled = !(bal.gte(amt) && amt.gt(zero) && this.props.contractStatus === 'ready')
 
     return (
       <UI.Container>
@@ -109,13 +109,15 @@ class App extends Component {
 
 const mapStateToProps = (state, ownProps) => {
   return {
-    balance: state.balance
+    balance: state.balance,
+    userId: state.userId,
+    contractStatus: state.contractStatus,
   }
 }
 
 const mapDispatchToProps = (dispatch, ownProps) => {
   return {
-    deployContract: () => dispatch(deployContract()),
+    deployContract: (userId) => dispatch(deployContract(userId)),
   }
 }
 

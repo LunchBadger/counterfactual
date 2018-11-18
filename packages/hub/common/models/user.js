@@ -12,10 +12,12 @@ const {
   fromEth,
   buildCreate2Address,
   getBalance,
+  isContract,
 } = require('../../lib/helpers')
 const {
-  buildCFContractAddress
-} = require('../../lib/contract')
+  buildCFContractAddress,
+  deployContract,
+} = require('../../lib/factory')
 const {
   sendMail
 } = require('../../lib/mail')
@@ -77,6 +79,7 @@ module.exports = function(User) {
       const salt = Date.now()
 
       ctx.instance.contractAddress = await buildCFContractAddress(salt)
+      ctx.instance.salt = salt
       ctx.instance.contractStatus = 'reserved'
 
       next()
@@ -134,6 +137,59 @@ module.exports = function(User) {
         next()
       })
     })();
+  })
+
+  User.deployContract = (payload, cb) => {
+    ;(async () => {
+      try {
+        const { userId } = payload
+
+        User.findById(userId, async (err, user) => {
+          if (err) {
+            cb(err.message, null)
+            return
+          }
+
+          assert.ok(!(await isContract(user.contractAddress)))
+
+          const { txHash, address } = await deployContract(user.salt)
+
+          assert.equal(user.contractAddress, address)
+          assert.ok(await isContract(address))
+
+          user.updateAttribute('contractStatus', 'active', (err) => {
+            if (err) {
+              console.log(err)
+            }
+          })
+
+          cb(null, {txHash, address})
+        })
+      } catch(err) {
+        cb(err.message, null)
+      }
+    })();
+  }
+
+  User.remoteMethod('deployContract', {
+    isStatic: true,
+    accepts: [
+      {
+        arg: 'data',
+        description: 'JSON payload',
+        type: 'object',
+        http: {source: 'body'},
+        required: true,
+      },
+    ],
+    http: {path: '/deploy-contract', verb: 'post'},
+    returns: [
+      {
+        arg: 'data',
+        type: 'object',
+        root: true,
+      },
+    ]
   })
 
   User.on('resetPasswordRequest', function (info) {

@@ -30,7 +30,10 @@ class Web3Connector {
       if (err) {
         return cb(err);
       }
-      this.defaultAccount = accounts[0];
+
+      // TODO: figure out why there is no accounts with parity
+      this.defaultAccount = accounts[0] || '0xb2b0f76ece233b8e4bb318e9d663bead67060ca8'
+      ;
       cb(null, accounts);
     });
   }
