@@ -1,7 +1,12 @@
 import React, { Component } from 'react';
 import styled from 'styled-components'
 import { connect } from 'react-redux'
-import { login } from './actions'
+import { deployContract } from './actions'
+import {
+  toWei,
+} from './utils'
+
+const BN = require('bn.js')
 
 const UI = {
   Header: styled.div`
@@ -52,9 +57,13 @@ const UI = {
   `,
   Actions: styled.div`
     text-align: center;
+    margin-bottom: 1em;
   `,
   Button: styled.button`
     cursor: pointer;
+  `,
+  Notice: styled.div`
+    font-size: 0.8em;
   `
 }
 
@@ -62,46 +71,35 @@ class App extends Component {
   constructor() {
     super()
     this.state = {
-      email: 'alice@example.com',
-      password: 'helloworld123'
+      recipient: '0xaC59D9C3f5d94bEcF12aFA90b8c1Dd3257039334',
+      amount: 1,
     }
   }
 
-  async login() {
-    const { email, password } = this.state
-    await this.props.login(email, password)
-    if (this.props.loggedIn) {
-      this.props.history.push('/deploy')
-    }
+  async deploy() {
+    await this.props.deployContract()
   }
 
   render() {
-    const { email, password } = this.state
+    const { amount, recipient } = this.state
+    const bal = new BN(this.props.balance)
+    const amt = new BN(toWei(amount))
+    const zero = new BN(0)
+    const disabled = !(bal.gte(amt) && amt.gt(zero))
 
     return (
       <UI.Container>
         <UI.Header>
-          Login
+          Deploy
         </UI.Header>
         <UI.Form onSubmit={event => {
           event.preventDefault()
-          this.login()
+          this.deploy()
         }}>
-          <UI.Field>
-            <UI.Label>Email</UI.Label>
-            <UI.Input value={email} onChange={event => this.setState({email: event.target.value})} />
-          </UI.Field>
-          <UI.Field>
-            <UI.Label>Password</UI.Label>
-            <UI.Input type="password" value={password} onChange={event => this.setState({password: event.target.value})} />
-          </UI.Field>
           <UI.Actions>
-            <UI.Button type="submit">
-              Log in
+            <UI.Button type="submit" disabled={disabled}>
+              Send 1 ETH to charlie
             </UI.Button>
-          </UI.Actions>
-          <UI.Actions>
-            <a href="/forgot-password">Forgot password</a>
           </UI.Actions>
         </UI.Form>
       </UI.Container>
@@ -111,13 +109,13 @@ class App extends Component {
 
 const mapStateToProps = (state, ownProps) => {
   return {
-    loggedIn: state.loggedIn
+    balance: state.balance
   }
 }
 
 const mapDispatchToProps = (dispatch, ownProps) => {
   return {
-    login: (email, password) => dispatch(login(email, password)),
+    deployContract: () => dispatch(deployContract()),
   }
 }
 

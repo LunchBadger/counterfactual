@@ -4,7 +4,9 @@ const web3 = new Web3()
 
 const BN = require('bn.js')
 
-const big = (n) => new BN(n.toString(10))
+export function toBig(n) {
+  return new BN(n.toString(10))
+}
 
 const contractJSON = require('channel-contracts/build/contracts/Channel.json')
 const { abi, networks } = contractJSON
@@ -85,7 +87,7 @@ export async function getChannelBalance(payer) {
   const instance = new web3.eth.Contract(abi, address)
   const result = await instance.methods.payers(payer).call()
 
-  return big(result.amount)
+  return toBig(result.amount)
 }
 
 export function getTestAddresses() {

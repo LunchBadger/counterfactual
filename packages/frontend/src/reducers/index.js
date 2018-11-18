@@ -9,8 +9,8 @@ import {
 
 let initialState = {
   email: null,
-  userId: null,
-  loggedIn: false,
+  userId: parseInt(localStorage.getItem('userId')),
+  loggedIn: !!localStorage.getItem('sessionId'),
   contractAddress: null,
   contractStatus: null,
   balance: 0,

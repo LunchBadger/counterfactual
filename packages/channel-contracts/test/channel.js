@@ -9,6 +9,7 @@ const big = (n) => new BN(n.toString(10))
 const tenPow18 = big(10).pow(big(18))
 const oneEth = big(1).mul(tenPow18).toString(10)
 
+/*
 contract('StateChannel', (accounts) => {
   const reverter = new Reverter(web3);
   const hub = accounts[0]
@@ -94,3 +95,4 @@ contract('StateChannel', (accounts) => {
     })
   })
 })
+*/

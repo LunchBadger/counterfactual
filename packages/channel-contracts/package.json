@@ -7,19 +7,20 @@
     "node": ">=10"
   },
   "dependencies": {
-    "ethers": "^4.0.0"
+    "ethers": "^4.0.0",
+    "solc": "^0.5.0",
+    "truffle-hdwallet-provider": "0.0.6",
+    "web3": "^1.0.0-beta.36"
   },
   "devDependencies": {
-    "chai": "^4.2.0",
-    "ganache-cli": "^6.1.8",
-    "mocha": "^5.2.0",
-    "solc": "^0.4.25",
-    "solium": "^1.1.8",
-    "truffle": "^4.1.14",
     "bn.js": "^4.11.8",
+    "chai": "^4.2.0",
     "ethereumjs-util": "^6.0.0",
     "ganache-cli": "^6.1.8",
+    "mocha": "^5.2.0",
     "moment": "^2.22.2",
+    "solium": "^1.1.8",
+    "truffle": "^5.0.0-beta.1",
     "web3-utils": "^1.0.0-beta.36"
   },
   "scripts": {

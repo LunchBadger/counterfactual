@@ -36,6 +36,10 @@ start/hub:
 start/testrpc:
 	@ganache-cli -m "purse alien once arrive fitness deposit visa token sun brick intact slam"
 
+.PHONY: start/parity
+start/parity:
+	@./parity -c dev-insecure --chain ./packages/channel-contracts/chain.json --jsonrpc-cors=all
+
 .PHONY: deploy/contracts
 deploy/contracts:
 	@(cd packages/channel-contracts && rm -rf build && truffle deploy)

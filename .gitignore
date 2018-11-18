@@ -61,3 +61,5 @@ typings/
 
 packages/channel-contracts/build/
 packages/app-server
+
+parity

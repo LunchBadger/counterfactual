@@ -11,6 +11,8 @@ import Signup from './Signup'
 import ForgotPassword from './ForgotPassword'
 import ResetPassword from './ResetPassword'
 import Logout from './Logout'
+import Send from './Send'
+import Deploy from './Deploy'
 import { refreshUser } from './actions'
 
 import {
@@ -71,6 +73,7 @@ const UI = {
 
 class App extends Component {
   componentDidMount() {
+    this.props.refreshUser(this.props.userId)
     setInterval(() => {
       if (this.props.loggedIn) {
         this.props.refreshUser(this.props.userId)
@@ -116,7 +119,12 @@ class App extends Component {
                       Balance: {toEth(balance)}
                     </div>
                     <div>
-                      <Link to="/logout">Logout</Link>
+                      <div>
+                        <Link to="/deploy">Deploy</Link>
+                      </div>
+                      <div>
+                        <Link to="/logout">Logout</Link>
+                      </div>
                     </div>
                   </div>,
                   ]
@@ -141,6 +149,7 @@ class App extends Component {
             </UI.SuccessMessage>
           : null}
           <Route path="/" exact component={Home} />
+          <Route path="/send" exact component={Send} />
           <Route path="/channel" exact component={Channel} />
           <Route path="/closechannel" exact component={CloseChannel} />
           <Route path="/status" exact component={Status} />
@@ -149,6 +158,7 @@ class App extends Component {
           <Route path="/forgot-password" exact component={ForgotPassword} />
           <Route path="/reset-password" exact component={ResetPassword} />
           <Route path="/logout" exact component={Logout} />
+          <Route path="/deploy" exact component={Deploy} />
         </UI.Container>
       </Router>
     );

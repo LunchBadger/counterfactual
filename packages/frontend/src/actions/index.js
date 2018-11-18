@@ -11,18 +11,18 @@ export const SET_SUCCESS_MESSAGE = 'SET_SUCCESS_MESSAGE'
 export const login = (email, password) => {
   return async dispatch => {
     try {
-      const result = await getModels().user.login({
+      const {id:sessionId, userId} = await getModels().user.login({
         email, password
       })
 
-      const sessionId = result.id
       localStorage.setItem('sessionId', sessionId)
+      localStorage.setItem('userId', userId)
 
-      const user = await getModels().user.findById(result.userId)
+      const user = await getModels().user.findById(userId)
       dispatch(setLoginSuccess(true))
       dispatch(setUser({
         email,
-        userId: result.userId,
+        userId: userId,
         contractAddress: user.contractAddress,
         contractStatus: user.contractStatus,
         balance: user.balance,
@@ -71,6 +71,8 @@ export const logout = () => {
       //const sessionId = localStorage.getItem('sessionId')
       //const accessToken = getModels().accessToken(sessionId)
       //const result = await getModels().User.logout({accessToken: accessToken})
+      localStorage.removeItem('sessionId')
+      localStorage.removeItem('userId')
       dispatch(setUser({
         email: null,
         userId: null,
@@ -135,6 +137,27 @@ export const refreshUser = (userId) => {
         balance: user.balance,
         emailVerified: user.emailVerified,
       }))
+    } catch(err) {
+      dispatch(setErrorMessage(err.message))
+    }
+  }
+}
+
+export const sendEther = (recipient, amount) => {
+  return async dispatch => {
+    try {
+      console.log(recipient, amount)
+      dispatch(setSuccessMessage('sent'))
+    } catch(err) {
+      dispatch(setErrorMessage(err.message))
+    }
+  }
+}
+
+export const deployContract = () => {
+  return async dispatch => {
+    try {
+      dispatch(setSuccessMessage('deploying'))
     } catch(err) {
       dispatch(setErrorMessage(err.message))
     }

@@ -1,4 +1,4 @@
-pragma solidity ^0.4.24;
+pragma solidity >0.4.99 <0.6.0;
 
 import "./SafeMath.sol";
 
@@ -25,7 +25,7 @@ contract Channel {
     }
 
     function deposit(address payee, uint _timeout) public payable {
-        bytes32 key = keccak256(msg.sender, payee);
+        bytes32 key = keccak256(abi.encodePacked(msg.sender, payee));
         require(payers[key].complete == false, "Channel:deposit withdrawn");
 
         payers[key].amount = msg.value;
@@ -35,7 +35,7 @@ contract Channel {
 
     // NOTE: this is a basic contract for a quick demo, it's not secured at all!
     function withdraw(bytes32 _hash, bytes32 r, bytes32 s, uint8 v, uint256 value, address payer, address receiver) public {
-        bytes32 key = keccak256(payer, hub);
+        bytes32 key = keccak256(abi.encodePacked(payer, hub));
         require(payers[key].amount >= value, "Channel:withdraw overdrawn");
         require(payers[key].complete == false, "Channel:withdraw withdrawn");
 
@@ -50,6 +50,6 @@ contract Channel {
 
         payers[key].amount = payers[key].amount.sub(value);
         //payers[key].complete = true;
-        receiver.transfer(value);
+        //receiver.transfer(value);
     }
 }
