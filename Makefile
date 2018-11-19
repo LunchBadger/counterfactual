@@ -35,6 +35,10 @@ start/server:
 start/hub:
 	@(cd packages/hub && npm start)
 
+.PHONY: start/hub/debug
+start/hub/debug:
+	@(cd packages/hub && DEBUG=loopback:* npm start)
+
 .PHONY: start/testrpc
 start/testrpc:
 	@ganache-cli -m "purse alien once arrive fitness deposit visa token sun brick intact slam"

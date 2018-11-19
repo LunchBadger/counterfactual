@@ -60,6 +60,7 @@ async function spawnWatcher(user) {
     }
   }
   await updateBal()
+  // TODO: use events
   setInterval(async () => {
     updateBal()
   }, 3e3)
@@ -127,6 +128,7 @@ module.exports = function(User) {
       {arg: 'newPassword', type: 'string', required: true},
     ],
     http: {path: '/update-password-from-token', verb: 'post'},
+    "accessScopes": ["reset-password"],
     returns: {type: 'boolean', arg: 'passwordChanged'}
   })
 
