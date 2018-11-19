@@ -30,7 +30,7 @@ const provider = new HDWalletProvider(
 
 const web3 = new Web3(provider)
 
-async function deployContract(salt) {
+async function deployContract(salt, recipient, amount) {
   const factory = new web3.eth.Contract(abi, address)
   const account = '0xb2b0f76ece233b8e4bb318e9d663bead67060ca8'
   const nonce =  await web3.eth.getTransactionCount(account)
@@ -40,6 +40,7 @@ async function deployContract(salt) {
     gasPrice: 10000000000,
     nonce,
   })
+  console.log(result)
 
   const computedAddr = buildCreate2Address(
     address,

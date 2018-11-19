@@ -122,9 +122,6 @@ class App extends Component {
                     </div>
                     <div>
                       <div>
-                        <Link to="/deploy">Deploy</Link>
-                      </div>
-                      <div>
                         <Link to="/logout">Logout</Link>
                       </div>
                     </div>

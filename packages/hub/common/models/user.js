@@ -33,8 +33,8 @@ function getUser(User, where) {
 const watchers = {}
 
 async function spawnWatcher(user) {
-  if (watchers[user.userId]) return
-  watchers[user.userId] = true
+  if (watchers[user.id]) return
+  watchers[user.id] = true
   let oldBal
   const updateBal = async () => {
     try {

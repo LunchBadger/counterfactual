@@ -18,10 +18,10 @@ NOTE: This is a work-in-progress.
 - [x] Bob sends her 20 ETH
 - [x] Alice’s page shows she has twenty ETH
 - [x] Alice’s “send 1 ETH to Charlie button” becomes active
-- [ ] Hub deploys contract, pays gas fee but deployed contract allows hub gas refund
+- [x] Hub deploys contract, pays gas fee but deployed contract allows hub gas refund
 - [x] Alice’s page shows contract deployed status : “active” (use web3.getCode)
-- [ ] Show that Charlie has 1 ETH
-- [ ] Alice’s page shows 18.xx (new ETH total after sending Charlie 1 ETH and paying for gas)
+- [x] Show that Charlie has 1 ETH
+- [x] Alice’s page shows 18.xx (new ETH total after sending Charlie 1 ETH and paying for gas)
 - [x] Alice logs out
 
 ### Instructions

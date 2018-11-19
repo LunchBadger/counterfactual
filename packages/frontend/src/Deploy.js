@@ -4,6 +4,8 @@ import { connect } from 'react-redux'
 import { deployContract } from './actions'
 import {
   toWei,
+  getBalance,
+  toEth,
 } from './utils'
 
 const BN = require('bn.js')
@@ -72,16 +74,36 @@ class App extends Component {
     super()
     this.state = {
       recipient: '0xaC59D9C3f5d94bEcF12aFA90b8c1Dd3257039334',
+      recipientBalance: 0,
+      hub: '0xb2b0f76eCE233B8E4BB318E9d663BEAd67060cA8',
+      hubBalance: 0,
       amount: 1,
     }
+
+
+    this.updateBalance()
   }
 
   async deploy() {
-    await this.props.deployContract(this.props.userId)
+    const { recipient, amount } = this.state
+    await this.props.deployContract(this.props.userId, recipient, toWei(amount))
+
+    setTimeout(() => {
+      this.updateBalance()
+    }, 1e3)
+  }
+
+  async updateBalance() {
+    const recipientBalance = await getBalance(this.state.recipient)
+    const hubBalance = await getBalance(this.state.hub)
+    this.setState({
+      recipientBalance,
+      hubBalance,
+    })
   }
 
   render() {
-    const { amount, recipient } = this.state
+    const { amount, recipientBalance, hubBalance } = this.state
     const bal = new BN(this.props.balance)
     const amt = new BN(toWei(amount))
     const zero = new BN(0)
@@ -96,6 +118,14 @@ class App extends Component {
           event.preventDefault()
           this.deploy()
         }}>
+          <UI.Field>
+            <UI.Label>Charlie's balance</UI.Label>
+            {toEth(recipientBalance)}
+          </UI.Field>
+          <UI.Field>
+            <UI.Label>Hub's balance</UI.Label>
+            {toEth(hubBalance)}
+          </UI.Field>
           <UI.Actions>
             <UI.Button type="submit" disabled={disabled}>
               Send 1 ETH to charlie

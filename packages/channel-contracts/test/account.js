@@ -4,7 +4,6 @@ const moment = require('moment')
 const BN = require('bn.js')
 const {soliditySha3: sha3} = require('web3-utils')
 const util = require('ethereumjs-util')
-const Reverter = require('./utils/reverter')
 const {
   buildCreate2Address,
   numberToUint256,
@@ -15,7 +14,6 @@ const tenPow18 = big(10).pow(big(18))
 const oneEth = big(1).mul(tenPow18).toString(10)
 
 contract('Account', (accounts) => {
-  const reverter = new Reverter(web3);
   const alice = accounts[0]
   const gasPrice = big(25000000000)
 
@@ -23,7 +21,6 @@ contract('Account', (accounts) => {
     it('should deploy contract', async () => {
       const factory = await Factory.deployed()
       const bytecode = Account.bytecode
-      const creatorAddress = alice
       const salt = 1
 
       const contractAddress = buildCreate2Address(

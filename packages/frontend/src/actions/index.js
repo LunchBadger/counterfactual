@@ -43,19 +43,23 @@ export const signup = (email, password) => {
       await getModels().User.create({
         email, password
       })
-      const result = await getModels().user.login({
+      const {id:sessionId, userId} = await getModels().user.login({
         email, password
       })
-      const user = await getModels().user.findById(result.userId)
+      const user = await getModels().user.findById(userId)
+
+      localStorage.setItem('sessionId', sessionId)
+      localStorage.setItem('userId', userId)
+
       dispatch(setLoginSuccess(true))
       dispatch(setUser({
         email,
-        userId: result.userId,
+        userId: userId,
         contractAddress: user.contractAddress,
         contractStatus: user.contractStatus,
         balance: user.balance,
         emailVerified: user.emailVerified,
-        sessionId: result.id
+        sessionId: sessionId
       }))
       dispatch(setSuccessMessage('account created successfully'))
     } catch(err) {
@@ -154,10 +158,10 @@ export const sendEther = (recipient, amount) => {
   }
 }
 
-export const deployContract = (userId) => {
+export const deployContract = (userId, recipient, amount) => {
   return async dispatch => {
     try {
-      const {txHash} = await getModels().User.deployContract({userId})
+      const {txHash} = await getModels().User.deployContract({userId, recipient, amount})
 
       dispatch(setSuccessMessage(`transaction ${txHash}`))
     } catch(err) {
