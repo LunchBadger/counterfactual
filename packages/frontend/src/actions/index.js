@@ -8,9 +8,54 @@ export const REFRESH_USER = 'REFRESH_USER'
 export const SET_ERROR_MESSAGE = 'SET_ERROR_MESSAGE'
 export const SET_SUCCESS_MESSAGE = 'SET_SUCCESS_MESSAGE'
 
+// TODO: clean up, remove redundant code
+
 export const login = (email, password) => {
   return async dispatch => {
     try {
+      const {id:sessionId, userId} = await getModels().user.login({
+        email, password
+      })
+
+      localStorage.setItem('sessionId', sessionId)
+      localStorage.setItem('userId', userId)
+
+      const user = await getModels().user.findById(userId)
+      dispatch(setLoginSuccess(true))
+      dispatch(setUser({
+        email,
+        userId: userId,
+        contractAddress: user.contractAddress,
+        contractStatus: user.contractStatus,
+        balance: user.balance,
+        emailVerified: user.emailVerified,
+        sessionId
+      }))
+      dispatch(setSuccessMessage('login successful'))
+    } catch(err) {
+      dispatch(setLoginSuccess(false))
+      dispatch(setErrorMessage(err.message))
+    }
+  }
+}
+
+export const loginGoogle = (email, googleId) => {
+  return async dispatch => {
+    try {
+      // TODO: not do this
+      const password = 'helloworld123'
+
+      // TODO: fix
+      try {
+        await getModels().user.login({
+          email, password
+        })
+      } catch(err) {
+        await getModels().User.create({
+          email, password
+        })
+      }
+
       const {id:sessionId, userId} = await getModels().user.login({
         email, password
       })
@@ -68,6 +113,45 @@ export const signup = (email, password) => {
     }
   }
 }
+
+export const signupGoogle = (email, googleId) => {
+  return async dispatch => {
+    try {
+      // TODO: not do this
+      const password = 'helloworld123'
+
+      await getModels().User.create({
+        email,
+        password,
+        googleId,
+      })
+      const {id:sessionId, userId} = await getModels().user.login({
+        email,
+        password
+      })
+      const user = await getModels().user.findById(userId)
+
+      localStorage.setItem('sessionId', sessionId)
+      localStorage.setItem('userId', userId)
+
+      dispatch(setLoginSuccess(true))
+      dispatch(setUser({
+        email,
+        userId: userId,
+        contractAddress: user.contractAddress,
+        contractStatus: user.contractStatus,
+        balance: user.balance,
+        emailVerified: user.emailVerified,
+        sessionId: sessionId
+      }))
+      dispatch(setSuccessMessage('account created successfully'))
+    } catch(err) {
+      dispatch(setLoginSuccess(false))
+      dispatch(setErrorMessage(err.message))
+    }
+  }
+}
+
 
 export const logout = () => {
   return async dispatch => {

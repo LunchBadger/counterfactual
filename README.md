@@ -8,8 +8,7 @@ NOTE: This is a work-in-progress.
 
 ### Demo steps
 
-- [x] Alice registers with hub like any other web2 provider (email/password)
-- [ ] Google OAuth
+- [x] Alice registers with hub like any other web2 provider (email/password, Google OAuth)
 - [x] After logged in, hub generates contract address using create2 and displays on Alice’s page
 - [x] Alice’s page shows contract deployed status : “not deployed”
 - [x] Alice logs out

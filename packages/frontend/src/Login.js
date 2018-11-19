@@ -1,7 +1,8 @@
 import React, { Component } from 'react';
 import styled from 'styled-components'
 import { connect } from 'react-redux'
-import { login } from './actions'
+import { login, loginGoogle } from './actions'
+import { GoogleLogin } from 'react-google-login';
 
 const UI = {
   Header: styled.div`
@@ -52,9 +53,14 @@ const UI = {
   `,
   Actions: styled.div`
     text-align: center;
+    margin: 1em 0;
   `,
   Button: styled.button`
     cursor: pointer;
+  `,
+  GoogleButton: styled.div`
+    width: 120px;
+    margin: 0 auto;
   `
 }
 
@@ -65,11 +71,23 @@ class App extends Component {
       email: 'alice@example.com',
       password: 'helloworld123'
     }
+
+    this.responseGoogle = this.responseGoogle.bind(this)
   }
 
   async login() {
     const { email, password } = this.state
     await this.props.login(email, password)
+    if (this.props.loggedIn) {
+      this.props.history.push('/deploy')
+    }
+  }
+
+  async responseGoogle(googleUser) {
+    const profile = googleUser.getBasicProfile()
+    const id = profile.getId()
+    const email = profile.getEmail()
+    await this.props.loginGoogle(email, id)
     if (this.props.loggedIn) {
       this.props.history.push('/deploy')
     }
@@ -101,6 +119,23 @@ class App extends Component {
             </UI.Button>
           </UI.Actions>
           <UI.Actions>
+            <UI.GoogleButton>
+              <GoogleLogin
+                clientId="770197609793-ifb9okajbl55cjemiv3926b37vqldca0.apps.googleusercontent.com"
+                buttonText="Sign in with Google"
+                onSuccess={this.responseGoogle}
+                onFailure={this.responseGoogle}
+                style={{
+                  cursor: 'pointer',
+                  fontSize: '0.8em',
+                  width: 'auto',
+                  height: 'auto',
+                  padding: '0.5em',
+                }}
+              />
+            </UI.GoogleButton>
+          </UI.Actions>
+          <UI.Actions>
             <a href="/forgot-password">Forgot password</a>
           </UI.Actions>
         </UI.Form>
@@ -118,6 +153,7 @@ const mapStateToProps = (state, ownProps) => {
 const mapDispatchToProps = (dispatch, ownProps) => {
   return {
     login: (email, password) => dispatch(login(email, password)),
+    loginGoogle: (email, googleId) => dispatch(loginGoogle(email, googleId)),
   }
 }
 

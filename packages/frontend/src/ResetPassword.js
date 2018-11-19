@@ -80,6 +80,11 @@ class App extends Component {
     const { password, passwordConfirm, token } = this.state
 
     await this.props.resetPassword(password, passwordConfirm, token)
+
+    this.setState({
+      password: '',
+      passwordConfirm: '',
+    })
   }
 
   render() {

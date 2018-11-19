@@ -41,6 +41,9 @@
       "type": "string",
       "required": false
     },
+    "googleId": {
+      "type": "string"
+    },
     "contractStatus": {
       "type": "string"
     },
