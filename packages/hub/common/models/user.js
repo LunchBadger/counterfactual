@@ -15,7 +15,7 @@ const {
   isContract,
 } = require('../../lib/helpers')
 const {
-  buildCFContractAddress,
+  buildAccountAddress,
   deployContract,
 } = require('../../lib/factory')
 const {
@@ -71,47 +71,44 @@ module.exports = function(User) {
 
   User.validatesUniquenessOf('email')
 
-  User.observe('before save', function(ctx, next) {
-    ;(async () => {
-      if (!ctx.isNewInstance) {
-        return next()
-      }
+  User.observe('before save', async (ctx, next) => {
+    if (!ctx.isNewInstance) {
+      return next()
+    }
 
-      const salt = Date.now()
+    const salt = Date.now()
 
-      ctx.instance.contractAddress = await buildCFContractAddress(salt)
-      ctx.instance.salt = salt
-      ctx.instance.contractStatus = 'reserved'
+    ctx.instance.contractAddress = await buildAccountAddress(salt)
+    ctx.instance.salt = salt
+    ctx.instance.contractStatus = 'reserved'
 
-      next()
-    })();
+    next()
   })
 
-  User.updatePasswordFromToken = (accessToken, _, newPassword, cb) => {
-    ;(async () => {
-      try {
-        if (!accessToken) {
-          throw Error('access token is required')
-        }
+  User.updatePasswordFromToken = async (accessToken, _, newPassword) => {
+    try {
+      if (!accessToken) {
+        throw Error('access token is required')
+      }
 
+      return new Promise((resolve, reject) => {
         User.findById(accessToken.userId, (err, user) => {
           user.updateAttribute('password', newPassword, (err, user) => {
             if (err) {
-              cb({
+              return resolve({
                 error: err.message
               })
-              return
             }
 
-            cb(null, true)
+            resolve(true)
           })
         })
-      } catch(err) {
-        cb({
-          error: err.message
-        })
+      })
+    } catch(err) {
+      return {
+        error: err.message
       }
-    })();
+    }
   }
 
   User.remoteMethod('updatePasswordFromToken', {
@@ -121,40 +118,52 @@ module.exports = function(User) {
         arg: 'accessToken',
         type: 'object',
         http: function(ctx) {
-          return ctx.req.accessToken;
+          return ctx.req.accessToken
         }
       },
-      {arg: 'access_token', type: 'string', required: true, 'http': { source: 'query' }},
-      {arg: 'newPassword', type: 'string', required: true},
+      {
+        arg: 'access_token',
+        type: 'string',
+        required: true,
+        'http': { source: 'query' }
+      },
+      {
+        arg: 'newPassword',
+        type: 'string',
+        required: true
+      },
     ],
-    http: {path: '/update-password-from-token', verb: 'post'},
-    "accessScopes": ["reset-password"],
-    returns: {type: 'boolean', arg: 'passwordChanged'}
+    http: {
+      path: '/update-password-from-token',
+      verb: 'post'
+    },
+    'accessScopes': ['reset-password'],
+    returns: {
+      type: 'boolean',
+      arg: 'passwordChanged'
+    }
   })
 
-  User.afterRemote('login', function (ctx, user, next) {
-    ;(async () => {
-      User.findById(ctx.result.userId, async (err, user) => {
-        spawnWatcher(user)
-        next()
-      })
-    })();
+  User.afterRemote('login', (ctx, user, next) => {
+    User.findById(ctx.result.userId, async (err, user) => {
+      spawnWatcher(user)
+      next()
+    })
   })
 
-  User.deployContract = (payload, cb) => {
-    ;(async () => {
-      try {
-        const { userId } = payload
+  User.deployContract = async (payload) => {
+    try {
+      const { userId } = payload
 
+      return new Promise((resolve, reject) => {
         User.findById(userId, async (err, user) => {
           if (err) {
-            cb(err.message, null)
-            return
+            return reject(err.message)
           }
 
           assert.ok(!(await isContract(user.contractAddress)))
 
-          const { txHash, address } = await deployContract(user.salt)
+          const {txHash, address} = await deployContract(user.salt)
 
           assert.equal(user.contractAddress, address)
           assert.ok(await isContract(address))
@@ -165,12 +174,12 @@ module.exports = function(User) {
             }
           })
 
-          cb(null, {txHash, address})
+          resolve({txHash, address})
         })
-      } catch(err) {
-        cb(err.message, null)
-      }
-    })();
+      })
+    } catch(err) {
+      throw Error(err.message)
+    }
   }
 
   User.remoteMethod('deployContract', {
@@ -194,30 +203,21 @@ module.exports = function(User) {
     ]
   })
 
-  User.on('resetPasswordRequest', function (info) {
-    ;(async () => {
-      const { email, accessToken } = info
-      const {id:token} = accessToken
+  User.on('resetPasswordRequest', async (info) => {
+    const { email, accessToken } = info
+    const {id:token} = accessToken
 
-      /*
-      let t = User.app.models.accessToken.create({
-        ttl: -1,
-        scopes: ['test']
-      })
-      console.log(t)
-      */
+    const url = `http://localhost:8080/reset-password?access_token=${token}`
+    console.log(url)
 
-      console.log(token)
+    const text = `Reset password: ${url}`
 
-      const text = `Reset password http://localhost:8080/reset-password?access_token=${token}`
-
-      await sendMail({
-        to: email,
-        from: 'no-reply@example.com',
-        subject: 'Reset password',
-        text,
-        html: text
-      })
-    })();
-  });
+    await sendMail({
+      to: email,
+      from: 'no-reply@example.com',
+      subject: 'Reset password',
+      text,
+      html: text
+    })
+  })
 }

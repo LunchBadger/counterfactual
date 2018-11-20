@@ -1,4 +1,8 @@
-const {deployContract, buildCFContractAddress, waitForDeployEvent} = require('./factory')
+const {
+  deployContract,
+  buildAccountAddress,
+  waitForDeployEvent
+} = require('./factory')
 
 const {
   isContract,
@@ -8,14 +12,14 @@ const {
 
 const salt = 10
 async function wait() {
-  const address = await buildCFContractAddress(salt)
+  const address = await buildAccountAddress(salt)
   const event = await waitForDeployEvent(address)
   console.log(event)
 }
 
 async function main() {
   try {
-    const address = await buildCFContractAddress(salt)
+    const address = await buildAccountAddress(salt)
 
     console.log(await isContract(address))
     console.log(address)

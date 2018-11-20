@@ -1,10 +1,5 @@
 import React, { Component } from 'react';
 import styled from 'styled-components'
-import {
-  getModels,
-  getContractAddress,
-  getTestAddress
-} from './utils';
 
 const UI = {
   Header: styled.div`

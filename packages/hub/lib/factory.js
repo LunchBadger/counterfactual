@@ -58,7 +58,7 @@ async function deployContract(salt, recipient, amount) {
   }
 }
 
-async function buildCFContractAddress(salt) {
+async function buildAccountAddress(salt) {
   return buildCreate2Address(
     address,
     numberToUint256(salt),
@@ -80,6 +80,6 @@ function waitForDeployEvent(address) {
 module.exports = {
   address,
   deployContract,
-  buildCFContractAddress,
+  buildAccountAddress,
   waitForDeployEvent,
 }
